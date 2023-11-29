@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, View, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,56 +13,18 @@ type RouteParams = {
   age: number;
   vehicle: string;
   year: number;
+  price: number;
 };
 
 export function Budget() {
+  const [priceBase, setPriceBase] = useState(0);
   const [pricePerAge, setPricePerAge] = useState(0);
   const [pricePerYear, setPricePerYear] = useState(0);
   const [priceTotal, setPriceTotal] = useState(0);
 
-  const priceBase = 1000;
-
   const navigation = useNavigation();
   const route = useRoute();
   const parameters = route.params as RouteParams;
-
-  useEffect(() => {
-    var total = priceBase;
-
-    var priceAge = calcPricePerAge(total);
-    total += priceAge;
-
-    var priceYear = calcPricePerYear(total);
-    total += priceYear;
-
-    setPricePerAge(priceAge);
-    setPricePerYear(priceYear);
-    setPriceTotal(total);
-  }, []);
-
-  function calcPricePerAge(total: number) {
-    switch (true) {
-      case parameters.age < 22:
-        return total * 0.2;
-      case parameters.age < 28:
-        return total * 0.18;
-      default:
-        return total * -0.15;
-    }
-  }
-
-  function calcPricePerYear(total: number) {
-    switch (true) {
-      case parameters.year < 2000:
-        return total * 0.3;
-      case parameters.year <= 2009:
-        return total * 0.15;
-      case parameters.year >= 2016:
-        return total * 0.1;
-      default:
-        return 0;
-    }
-  }
 
   function handleNext() {
     navigation.navigate("infos", { user: parameters.user });
@@ -70,6 +32,62 @@ export function Budget() {
 
   function handleBack() {
     navigation.goBack();
+  }
+
+  useEffect(() => {
+    var priceTotal = calculateBasePrice();
+    setPriceBase(priceTotal);
+
+    var priceAge = calculatePricePerAge(priceTotal);
+    priceTotal += priceAge;
+
+    var priceYear = calculatePricePerYear(priceTotal);
+    priceTotal += priceYear;
+
+    setPricePerAge(priceAge);
+    setPricePerYear(priceYear);
+    setPriceTotal(priceTotal);
+  }, []);
+
+  function calculateBasePrice() {
+    var priceBase = 1000;
+    var vehiclePrice = parameters.price;
+
+    if (vehiclePrice > 100000) {
+      priceBase = 2000;
+    } else if (vehiclePrice >= 50000 && vehiclePrice <= 100000) {
+      priceBase = 1500;
+    }
+
+    return priceBase;
+  }
+
+  function calculatePricePerAge(priceTotal: number) {
+    var priceAge = 0;
+
+    if (parameters.age < 22) {
+      priceAge = priceTotal * 0.2;
+    } else if (parameters.age >= 22 && parameters.age < 28) {
+      priceAge = priceTotal * 0.18;
+    } else {
+      priceAge = priceTotal * -0.15;
+    }
+
+    return priceAge;
+  }
+
+  function calculatePricePerYear(priceTotal: number) {
+    var priceYear = 0;
+
+    if (parameters.year < 2000) {
+      priceYear = priceTotal * 0.3;
+    } else if (parameters.year >= 2000 && parameters.year <= 2009) {
+      priceYear = priceTotal * 0.15;
+    } else if (parameters.year >= 2016) {
+      priceYear = priceTotal * 0.1;
+    }
+
+    return priceYear;
   }
 
   return (
