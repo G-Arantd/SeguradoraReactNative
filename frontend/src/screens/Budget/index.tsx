@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Text, View, TouchableOpacity, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Text, View, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "./styles";
+import { LinearGradient } from "expo-linear-gradient";
 import Card from "../../components/Card";
-
-const gradientColors = ["#5374B6", "#b6535371"];
+import { useEffect, useState } from "react";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 type RouteParams = {
   user: string;
@@ -21,10 +20,15 @@ export function Budget() {
   const [pricePerAge, setPricePerAge] = useState(0);
   const [pricePerYear, setPricePerYear] = useState(0);
   const [priceTotal, setPriceTotal] = useState(0);
+  const [currencySymbol, setCurrencySymbol] = useState("");
 
   const navigation = useNavigation();
+
   const route = useRoute();
+
   const parameters = route.params as RouteParams;
+
+  const precoDolar = 5.0;
 
   function handleNext() {
     navigation.navigate("infos", { user: parameters.user });
@@ -35,36 +39,39 @@ export function Budget() {
   }
 
   useEffect(() => {
-    var priceTotal = calculateBasePrice();
-    setPriceBase(priceTotal);
-
-    var priceAge = calculatePricePerAge(priceTotal);
-    priceTotal += priceAge;
-
-    var priceYear = calculatePricePerYear(priceTotal);
-    priceTotal += priceYear;
-
-    setPricePerAge(priceAge);
-    setPricePerYear(priceYear);
-    setPriceTotal(priceTotal);
+    calcSecurity();
   }, []);
 
-  function calculateBasePrice() {
-    var priceBase = 1000;
-    var vehiclePrice = parameters.price;
+  function calcSecurity() {
+    var firstPriceBase = calcPriceBase();
+    setCurrencySymbol("R$");
+    setPriceBase(firstPriceBase);
+    var priceTotal = firstPriceBase;
 
-    if (vehiclePrice > 100000) {
+    var pricePerAge = calcPricePerAge(priceTotal);
+    priceTotal = priceTotal + pricePerAge;
+
+    var pricePerYear = calcPricePerYear(priceTotal);
+    priceTotal = priceTotal + pricePerYear;
+
+    setPricePerAge(pricePerAge);
+    setPricePerYear(pricePerYear);
+    setPriceTotal(priceTotal);
+  }
+
+  function calcPriceBase() {
+    var priceBase = 1000;
+    var priceVehicle = parameters.price;
+    if (priceVehicle > 100000) {
       priceBase = 2000;
-    } else if (vehiclePrice >= 50000 && vehiclePrice <= 100000) {
+    } else if (priceVehicle >= 50000 && priceVehicle <= 100000) {
       priceBase = 1500;
     }
-
     return priceBase;
   }
 
-  function calculatePricePerAge(priceTotal: number) {
+  function calcPricePerAge(priceTotal: number) {
     var priceAge = 0;
-
     if (parameters.age < 22) {
       priceAge = priceTotal * 0.2;
     } else if (parameters.age >= 22 && parameters.age < 28) {
@@ -72,26 +79,39 @@ export function Budget() {
     } else {
       priceAge = priceTotal * -0.15;
     }
-
     return priceAge;
   }
 
-  function calculatePricePerYear(priceTotal: number) {
+  function calcPricePerYear(valorTotal: number) {
     var priceYear = 0;
-
     if (parameters.year < 2000) {
-      priceYear = priceTotal * 0.3;
+      priceYear = valorTotal * 0.3;
     } else if (parameters.year >= 2000 && parameters.year <= 2009) {
-      priceYear = priceTotal * 0.15;
+      priceYear = valorTotal * 0.15;
     } else if (parameters.year >= 2016) {
-      priceYear = priceTotal * 0.1;
+      priceYear = valorTotal * 0.1;
     }
-
     return priceYear;
   }
 
+  function priceInDolar() {
+    var priceBaseDolar = priceBase / precoDolar;
+    var priceTotalDolar = priceTotal / precoDolar;
+    var pricePerAgeDolar = pricePerAge / precoDolar;
+    var pricePerYearDolar = pricePerYear / precoDolar;
+
+    setPriceBase(priceBaseDolar);
+    setPriceTotal(priceTotalDolar);
+    setPricePerAge(pricePerAgeDolar);
+    setPricePerYear(pricePerYearDolar);
+    setCurrencySymbol("$");
+  }
+
   return (
-    <LinearGradient colors={gradientColors} style={styles.linearGradient}>
+    <LinearGradient
+      colors={["#5374B6", "#f7b5b5"]}
+      style={styles.linearGradient}
+    >
       <SafeAreaView style={styles.globalContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Simulacar</Text>
@@ -99,20 +119,41 @@ export function Budget() {
 
         <View style={styles.titleContainer}>
           <Text style={styles.label}>
-            Olá {parameters.user}, fizemos um orçamento para seu veículo{" "}
+            Olá {parameters.user}, fizemos um orçamento para seu veiculo{" "}
             {parameters.vehicle}.
           </Text>
         </View>
 
         <View style={styles.containerInfo}>
-          <Card text="Base" value={priceBase} />
-          <Card text="Por idade" value={pricePerAge} />
-          <Card text="Por ano" value={pricePerYear} />
+          <Card text="Base" value={priceBase} currencySymbol={currencySymbol} />
+          <Card
+            text="Por idade"
+            value={pricePerAge}
+            currencySymbol={currencySymbol}
+          />
+          <Card text="Por ano" value={pricePerYear} currencySymbol={currencySymbol} />
         </View>
 
         <View style={styles.containerInfo}>
-          <Card text="Total" value={priceTotal} />
+          <Card text="Total" value={priceTotal} currencySymbol={currencySymbol} />
         </View>
+
+        <BouncyCheckbox
+          fillColor="black"
+          unfillColor="#FFFFFF"
+          textStyle={{ textDecorationLine: "none", color: "black" }}
+          text="Valores em dólar"
+          iconStyle={{ borderColor: "black" }}
+          innerIconStyle={{ borderWidth: 2 }}
+          onPress={(isChecked: boolean) => {
+            console.log("Checked: ", isChecked);
+            if (isChecked) {
+              priceInDolar();
+            } else {
+              calcSecurity();
+            }
+          }}
+        />
 
         <View style={styles.containerInfo}>
           <TouchableOpacity style={styles.btnGlobal} onPress={handleNext}>
