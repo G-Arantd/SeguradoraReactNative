@@ -7,6 +7,8 @@ import Card from "../../components/Card";
 import { useEffect, useState } from "react";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
+const gradientColors = ["#5374B6", "#b6535371"];
+
 type RouteParams = {
   user: string;
   age: number;
@@ -108,10 +110,7 @@ export function Budget() {
   }
 
   return (
-    <LinearGradient
-      colors={["#5374B6", "#f7b5b5"]}
-      style={styles.linearGradient}
-    >
+    <LinearGradient colors={gradientColors} style={styles.linearGradient}>
       <SafeAreaView style={styles.globalContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Simulacar</Text>
