@@ -15,6 +15,7 @@ type RouteParams = {
 export function Vehicle() {
   const [vehicle, setVehicle] = useState("");
   const [yearVehicle, setYearVehicle] = useState("");
+  const [priceVehicle, setPriceVehivle] = useState("")
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -31,6 +32,7 @@ export function Vehicle() {
       age: parameters.age,
       vehicle: vehicle,
       year: Number(yearVehicle),
+      price: Number(priceVehicle)
     });
   }
 
@@ -57,6 +59,14 @@ export function Vehicle() {
           <TextInput
             value={vehicle}
             onChangeText={setVehicle}
+            style={styles.input}
+          />
+
+          <Text style={styles.label}>Qual o valor do seu carro?</Text>
+          <TextInput
+            keyboardType="numeric"
+            value={priceVehicle}
+            onChangeText={setPriceVehivle}
             style={styles.input}
           />
 
