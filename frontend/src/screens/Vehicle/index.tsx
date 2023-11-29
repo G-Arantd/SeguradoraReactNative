@@ -23,7 +23,7 @@ export function Vehicle() {
   const parameters = route.params as RouteParams;
 
   function handleNext() {
-    if (vehicle === "" || yearVehicle === "") {
+    if (vehicle === "" || yearVehicle === "" || priceVehicle == "") {
       Alert.alert("Validação", "Preencha todos os campos");
       return;
     }
