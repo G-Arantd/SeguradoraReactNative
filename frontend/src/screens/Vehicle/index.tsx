@@ -4,6 +4,7 @@ import { Text, View, TextInput, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "./styles";
 import { LinearGradient } from "expo-linear-gradient";
+import { TextInputMask } from "react-native-masked-text";
 
 const gradientColors = ["#5374B6", "#b6535371"];
 
@@ -15,7 +16,8 @@ type RouteParams = {
 export function Vehicle() {
   const [vehicle, setVehicle] = useState("");
   const [yearVehicle, setYearVehicle] = useState("");
-  const [priceVehicle, setPriceVehivle] = useState("")
+  const [priceVehicle, setPriceVehivle] = useState("");
+  const [signVehicle, setSignVehicle] = useState("");
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -23,7 +25,7 @@ export function Vehicle() {
   const parameters = route.params as RouteParams;
 
   function handleNext() {
-    if (vehicle === "" || yearVehicle === "") {
+    if (vehicle === "" || yearVehicle === "" || priceVehicle === "") {
       Alert.alert("Validação", "Preencha todos os campos");
       return;
     }
@@ -78,6 +80,17 @@ export function Vehicle() {
             style={styles.input}
           />
         </View>
+
+        <Text style={styles.label}>Qual a placa do veículo?</Text>
+          <TextInputMask
+            type={"custom"}
+            style={styles.input}
+            value={signVehicle}
+            options={{ mask: "ASD-9A99" }}
+            onChangeText={(textValue) => {
+              setSignVehicle(textValue.toUpperCase());
+            }}
+          />
 
         <View style={styles.inputsContainer}>
           <TouchableOpacity style={styles.btnGlobal} onPress={handleNext}>
